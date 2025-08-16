@@ -2,36 +2,37 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctormodel.js";
+import jwt from "jsonwebtoken";
 
 //API for adding doctor
-const addDoctor = async(req,res) => {
+const addDoctor = async (req, res) => {
     try {
         console.log('BODY:', req.body);
         console.log('FILE:', req.file);
-        const {name,email,password,speciality,degree,experience,about,fees,address} = req.body;
+        const { name, email, password, speciality, degree, experience, about, fees, address } = req.body;
         const imageFile = req.file;
 
         //checking for all data to add doctor
-        if(!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address || !imageFile) {
+        if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address || !imageFile) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
         //validating email
-        if(!validator.isEmail(email)) {
+        if (!validator.isEmail(email)) {
             return res.status(400).json({ error: "Invalid email format" });
         }
 
         //validating password
-        if(password.length < 8) {
+        if (password.length < 8) {
             return res.status(400).json({ error: "Please enter a strong password" });
         }
-        
+
         //hashing password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         //Uploading image to cloudinary
-        const imageUpload = await cloudinary.uploader.upload(imageFile.path,{resource_type: "image"});
+        const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
         const imageUrl = imageUpload.secure_url;
 
         let parsedAddress = address;
@@ -60,9 +61,26 @@ const addDoctor = async(req,res) => {
         const newDoctor = new doctorModel(doctorData);
         await newDoctor.save();
 
-        res.json({success: true, message: "Doctor added successfully", imageUrl});
+        res.json({ success: true, message: "Doctor added successfully", imageUrl });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
-export {addDoctor};
+
+//API for admin login
+const loginAdmin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+            const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            return res.status(200).json({ success: true, token });
+        } else {
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export { addDoctor, loginAdmin };
