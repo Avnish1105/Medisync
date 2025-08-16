@@ -1,17 +1,55 @@
 import React, { createContext } from 'react';
 export const AdminContext = createContext();
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const AdminContextProvider = (props) => {
-
-    const [atoken,setAtoken] = React.useState(localStorage.getItem('aToken')? localStorage.getItem('aToken') : null);
-
+    const [atoken, setAtoken] = React.useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : null);
+    const [doctors, setDoctors] = React.useState([]);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    const value = {
-        // Add any context values you want to provide to the components
-        atoken,setAtoken,
-        backendUrl
+    const getAllDoctors = async () => {
+        try {
+            const { data } = await axios.post(
+                backendUrl + '/api/admin/all-doctors',
+                {},
+                { headers: { atoken } }
+            );
+
+            if (data.success) {
+                setDoctors(data.doctors);
+                // Remove or comment out the debug log after testing
+                // console.log(data.doctors);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const changeAvailability = async (docId) => {
+        try{
+            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { atoken } });
+            if (data.success) {
+                toast.success(data.message);
+                getAllDoctors();
+            } else{
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
+
+    const value = {
+        atoken,
+        setAtoken,
+        backendUrl,
+        doctors,
+        getAllDoctors,
+        changeAvailability
+    };
 
     return (
         <AdminContext.Provider value={value}>
