@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { assets } from '../assets/assets';
+import { AppContext } from '../context/AppContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [token, setToken] = useState(true); // simulate login state
+  const { token, logout } = useContext(AppContext); // Use context!
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef();
@@ -23,11 +24,7 @@ const Navbar = () => {
   // Change navbar style on scroll
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -78,24 +75,14 @@ const Navbar = () => {
               {dropdownOpen && (
                 <div className='absolute right-0 mt-3 w-40 bg-white shadow-xl border border-gray-100 rounded-lg p-2 z-20 text-gray-700 text-sm transform origin-top-right transition-all duration-200 ease-out animate-fade-in'>
                   <p onClick={() => { navigate('/myprofile'); setDropdownOpen(false); }} className='py-2 px-3 flex items-center gap-2 hover:bg-gray-100 rounded-md cursor-pointer transition-colors duration-200'>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                    My Profile
+                    {/* ...icon... */} My Profile
                   </p>
                   <p onClick={() => { navigate('/myappointments'); setDropdownOpen(false); }} className='py-2 px-3 flex items-center gap-2 hover:bg-gray-100 rounded-md cursor-pointer transition-colors duration-200'>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                      <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 000-2H7zm3 0a1 1 0 000 2h.01a1 1 0 000-2H10zm3 0a1 1 0 000 2h.01a1 1 0 000-2H13zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H10z" clipRule="evenodd" />
-                    </svg>
-                    My Appointments
+                    {/* ...icon... */} My Appointments
                   </p>
                   <hr className='my-2 border-gray-200'/>
-                  <p onClick={() => { setToken(false); setDropdownOpen(false); }} className='py-2 px-3 flex items-center gap-2 text-red-500 hover:bg-red-50 rounded-md cursor-pointer transition-colors duration-200'>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-                    </svg>
-                    Logout
+                  <p onClick={() => { logout(); setDropdownOpen(false); }} className='py-2 px-3 flex items-center gap-2 text-red-500 hover:bg-red-50 rounded-md cursor-pointer transition-colors duration-200'>
+                    {/* ...icon... */} Logout
                   </p>
                 </div>
               )}

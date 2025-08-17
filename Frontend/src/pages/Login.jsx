@@ -1,57 +1,30 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { AppContext } from '../context/AppContext'
-import axios from 'axios'
-import { toast } from 'react-toastify'
-import { useNavigate } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContext } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [state, setState] = useState('Login') // Default to 'Login'
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [state, setState] = useState('Login');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const navigate = useNavigate()
-  const { backendUrl, token, setToken } = useContext(AppContext)
+  const navigate = useNavigate();
+  const { token, register, login } = useContext(AppContext);
 
   const onSubmitHandler = async (event) => {
-    event.preventDefault()
-    try {
-      if (state === 'Sign Up') {
-        const { data } = await axios.post(
-          `${backendUrl}/api/user/register`,
-          { name, email, password }
-        )
-        if (data.success) {
-          localStorage.setItem('token', data.token)
-          setToken(data.token)
-          toast.success('Account created successfully!')
-        } else {
-          toast.error(data.message)
-        }
-      } else {
-        const { data } = await axios.post(
-          `${backendUrl}/api/user/login`,
-          { email, password }
-        )
-        if (data.success) {
-          localStorage.setItem('token', data.token)
-          setToken(data.token)
-          toast.success('Logged in successfully!')
-        } else {
-          toast.error(data.message)
-        }
-      }
-    } catch (err) {
-      toast.error('An error occurred. Please try again.')
-      console.error(err)
+    event.preventDefault();
+    if (state === 'Sign Up') {
+      await register({ name, email, password });
+    } else {
+      await login({ email, password });
     }
-  }
+  };
 
   useEffect(() => {
     if (token) {
-      navigate('/')
+      navigate('/');
     }
-  }, [token, navigate])
+  }, [token, navigate]);
 
   return (
     <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
@@ -94,7 +67,6 @@ const Login = () => {
             required
           />
         </div>
-        {/* Explicit, visible submit button */}
         <button
           type="submit"
           className="w-full py-2 my-2 rounded-md text-base bg-blue-600 text-white hover:bg-blue-700 transition"
@@ -127,7 +99,7 @@ const Login = () => {
         </p>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
