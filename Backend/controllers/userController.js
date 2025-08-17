@@ -2,6 +2,7 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import userModel from '../models/usermodel.js';
 import jwt from 'jsonwebtoken';
+import {v2 as cloudinary} from 'cloudinary';
 
 // API to register a new user
 const registerUser = async (req, res) => {
@@ -83,4 +84,61 @@ const loginUser = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser };
+//API to  get user profile data
+const getProfile = async (req, res) => {
+    try{
+        const {userId} = req.body;
+        const userData = await userModel.findById(userId).select('-password');
+
+        res.json({ success: true, userData });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+
+    }
+}
+
+//API to update user profile data
+const updateProfile = async (req, res) => {
+    try {
+        const { userId, name, phone, address, dob, gender } = req.body;
+        const imageFile = req.file;
+
+        if (!name || !phone || !dob || !gender) {
+            console.log('Profile update failed: Missing fields');
+            return res.json({ success: false, message: "Please fill all the fields" });
+        }
+
+        let parsedAddress = address;
+        if (address && typeof address === "string") {
+            try {
+                parsedAddress = JSON.parse(address);
+                console.log('Parsed address:', parsedAddress);
+            } catch (err) {
+                console.log('Profile update failed: Address is not valid JSON');
+                return res.json({ success: false, message: "Address is not valid JSON" });
+            }
+        }
+
+        await userModel.findByIdAndUpdate(userId, { name, phone, address: parsedAddress, dob, gender });
+        console.log(`Profile updated for userId: ${userId}`);
+        console.log('Updated fields:', { name, phone, address: parsedAddress, dob, gender });
+
+        if (imageFile) {
+            //Upload image to cloudinary
+            const imaageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
+            const imageUrl = imaageUpload.secure_url;
+            await userModel.findByIdAndUpdate(userId, { image: imageUrl });
+            console.log('Profile image updated:', imageUrl);
+        }
+
+        res.json({ success: true, message: "Profile updated successfully" });
+
+    } catch (error) {
+        console.log('Error in updateProfile:', error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export { registerUser, loginUser, getProfile, updateProfile };
