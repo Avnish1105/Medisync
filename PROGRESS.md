@@ -19,9 +19,9 @@
 - [x] Create API for Admin Login
 - [x] Create Admin Panel
 - [x] Create Add Doctor Functionality in Admin Panel
-- [ ] Display All Doctors List in Admin Panel
-- [ ] Display All Doctors on Frontend Website from Database
-- [ ] Create Patient Login and Registration System
+- [x] Display All Doctors List in Admin Panel
+- [x] Display All Doctors on Frontend Website from Database
+- [x] Create Patient Login and Registration System
 - [ ] Display and Update Patient Profile Data on Website
 - [ ] Create Appointment Booking Functionality
 - [ ] Display Booked Appointments on Website
