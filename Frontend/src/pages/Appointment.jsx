@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { doctors } from '../assets/assets';
+import { AppContext } from '../context/AppContext';
 import RelatedDoctors from '../components/RelatedDoctors';
 
 const Appointment = () => {
   const { doctorId } = useParams();
+  const { doctors } = useContext(AppContext);
   const [docInfo, setDocInfo] = useState(null);
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -15,7 +16,7 @@ const Appointment = () => {
   useEffect(() => {
     const found = doctors.find(doc => doc._id === doctorId);
     setDocInfo(found);
-  }, [doctorId]);
+  }, [doctorId, doctors]);
 
   useEffect(() => {
     generateSlots();

@@ -27,9 +27,11 @@ const TopDoctors = () => {
             />
 
             <div className="text-sm">
-              <div className="flex justify-between items-center text-green-600 font-medium mb-2">
+              <div className={`flex justify-between items-center font-medium mb-2 ${
+                item.available ? 'text-green-600' : 'text-red-500'
+              }`}>
                 <p>Status:</p>
-                <p>Available</p>
+                <p>{item.available ? 'Available' : 'Unavailable'}</p>
               </div>
               <p className="font-semibold text-lg text-gray-900">{item.name}</p>
               <p className="text-gray-500">{item.speciality}</p>

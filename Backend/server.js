@@ -4,6 +4,7 @@ import 'dotenv/config';
 import connectDB from './config/mongodb.js';
 import connectCloudinary from './config/cloudinary.js';
 import adminRoutes from './routes/adminRoutes.js';
+import doctorRouter from './routes/doctorRoutes.js';
 
 // App config
 const app = express();
@@ -18,6 +19,8 @@ app.use(cors());
 // API endpoints
 app.get('/', (req, res) => { res.send('API working aa') });
 app.use('/api/admin', adminRoutes);
+app.use('/api/doctor', doctorRouter);
+
 //localhost:4000/api/admin/add-doctor
 app.listen(PORT, () => {
   console.log(`Server is running on port${PORT}`);
