@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { assets } from '../assets/assets';
 import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
 
 const MyProfile = () => {
   const { userData, updateProfile, loadUserProfileData } = useContext(AppContext);
@@ -31,7 +32,6 @@ const MyProfile = () => {
             addressLine1 = addr.line1 || '';
             addressLine2 = addr.line2 || '';
           } catch {
-            // If not JSON, treat as single line address
             addressLine1 = userData.address;
           }
         }
@@ -61,6 +61,18 @@ const MyProfile = () => {
   };
 
   const handleSave = async () => {
+    const errors = [];
+    if (!form.name.trim()) errors.push("Name is required");
+    if (!form.phone.trim()) errors.push("Phone is required");
+    else if (!/^\d{10}$/.test(form.phone)) errors.push("Please enter a valid 10-digit phone number");
+    if (!form.gender) errors.push("Please select your gender");
+    if (!form.dob) errors.push("Please select your date of birth");
+
+    if (errors.length > 0) {
+      toast.error(errors.join('\n'));
+      return;
+    }
+
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (key === 'addressLine1' || key === 'addressLine2') return;
