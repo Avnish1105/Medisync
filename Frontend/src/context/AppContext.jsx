@@ -105,6 +105,31 @@ const AppContextProvider = (props) => {
         }
     };
 
+    // Send JSON for booking appointment
+    const bookAppointment = async (payload) => {
+        try {
+            const res = await axios.post(
+                backendUrl + '/api/user/book-appointment',
+                payload,
+                {
+                    headers: {
+                        token,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            if (res.data.success) {
+                toast.success(res.data.message || 'Appointment booked successfully!');
+            } else {
+                toast.error(res.data.message || 'Failed to book appointment');
+            }
+            return res.data; // <-- return the result
+        } catch (err) {
+            toast.error('Error booking appointment');
+            return { success: false };
+        }
+    };
+
     useEffect(() => {
         getDoctorsData();
     }, []);
@@ -128,7 +153,8 @@ const AppContextProvider = (props) => {
             backendUrl,
             userData,
             loadUserProfileData,
-            updateProfile
+            updateProfile,
+            bookAppointment
         }}>
             {props.children}
         </AppContext.Provider>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import RelatedDoctors from '../components/RelatedDoctors';
+import { toast } from 'react-toastify';
 
 const Appointment = () => {
+  const navigate = useNavigate();
   const { doctorId } = useParams();
-  const { doctors } = useContext(AppContext);
+  const { doctors, userData, bookAppointment } = useContext(AppContext);
   const [docInfo, setDocInfo] = useState(null);
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -14,7 +16,8 @@ const Appointment = () => {
   const timeRange = { start: 10, end: 20.5 }; // 10 AM to 8:30 PM
 
   useEffect(() => {
-    const found = doctors.find(doc => doc._id === doctorId);
+    // Fix: compare as strings to avoid ObjectId vs string mismatch
+    const found = doctors.find(doc => String(doc._id) === String(doctorId));
     setDocInfo(found);
   }, [doctorId, doctors]);
 
@@ -52,8 +55,50 @@ const Appointment = () => {
       return {
         day: date.toLocaleDateString('en-US', { weekday: 'short' }),
         date: date.getDate(),
+        fullDate: date.toISOString().split('T')[0], // YYYY-MM-DD
       };
     });
+  };
+
+  // Get booked slots for the selected date
+  const getBookedSlots = () => {
+    if (!docInfo || !docInfo.slots_booked) return [];
+    const selectedDay = getNext7Days()[selectedDateIndex];
+    return docInfo.slots_booked[selectedDay.fullDate] || [];
+  };
+
+  // --- Booking handler ---
+  const handleBook = async () => {
+    if (!userData || !userData._id) {
+      toast.error("Please login to book an appointment.");
+      return;
+    }
+    if (!docInfo || !docInfo._id) {
+      toast.error("Doctor information not loaded. Please try again.");
+      return;
+    }
+    if (!selectedSlot) {
+      toast.error("Please select a time slot.");
+      return;
+    }
+    const selectedDay = getNext7Days()[selectedDateIndex];
+
+    const payload = {
+      userId: userData._id,
+      docId: docInfo._id,
+      slotDate: selectedDay.fullDate,
+      slotTime: selectedSlot
+    };
+
+    // Await the booking and check the result before redirecting
+    const result = await bookAppointment(payload);
+
+    // Only redirect if booking was successful
+    if (result && result.success) {
+      setSelectedSlot('');
+      navigate('/myappointments');
+    }
+    // If not successful, do not redirect (toast will show error)
   };
 
   if (!docInfo) return <div className="text-center mt-10 text-lg">Loading doctor info...</div>;
@@ -111,17 +156,23 @@ const Appointment = () => {
             {availableSlots.length === 0 ? (
               <p className="text-gray-500">No slots available</p>
             ) : (
-              availableSlots.map((slot, index) => (
-                <button
-                  key={index}
-                  className={`whitespace-nowrap py-2 px-4 border rounded-full text-sm shrink-0 ${
-                    selectedSlot === slot ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-50'
-                  }`}
-                  onClick={() => setSelectedSlot(slot)}
-                >
-                  {slot}
-                </button>
-              ))
+              availableSlots.map((slot, index) => {
+                const bookedSlots = getBookedSlots();
+                const isBooked = bookedSlots.includes(slot);
+                return (
+                  <button
+                    key={index}
+                    className={`whitespace-nowrap py-2 px-4 border rounded-full text-sm shrink-0
+                      ${selectedSlot === slot && !isBooked ? 'bg-blue-600 text-white' : ''}
+                      ${isBooked ? 'bg-gray-300 text-gray-500 cursor-not-allowed line-through' : 'bg-white hover:bg-blue-50'}
+                    `}
+                    onClick={() => !isBooked && setSelectedSlot(slot)}
+                    disabled={isBooked}
+                  >
+                    {slot}
+                  </button>
+                );
+              })
             )}
           </div>
         </div>
@@ -129,7 +180,10 @@ const Appointment = () => {
         {/* Book button */}
         {selectedSlot && (
           <div className="mt-6">
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-all">
+            <button
+              className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-all"
+              onClick={handleBook}
+            >
               Book an appointment at {selectedSlot}
             </button>
           </div>
