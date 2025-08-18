@@ -221,4 +221,48 @@ const listAppointment = async (req, res) => {
     }
 };
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment };
+//API to cancel an appointment
+const cancelAppointment = async (req, res) => {
+    try {
+        const { userId, appointmentId } = req.body;
+
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData) {
+            return res.json({ success: false, message: "Appointment not found" });
+        }
+        // Verify the appointment user
+        if (appointmentData.userId.toString() !== userId) {
+            return res.json({ success: false, message: "You are not authorized to cancel this appointment" });
+        }
+        if (appointmentData.cancelled) {
+            return res.json({ success: false, message: "Appointment already cancelled" });
+        }
+
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
+
+        // Releasing the doctor's slot
+        const { docId, slotDate, slotTime } = appointmentData;
+        const doctorData = await doctorModel.findById(docId);
+        if (!doctorData) {
+            return res.json({ success: false, message: "Doctor not found" });
+        }
+
+        let slots_booked = doctorData.slots_booked || {};
+        if (slots_booked[slotDate]) {
+            slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime);
+            // Remove the date key if no slots left for that date
+            if (slots_booked[slotDate].length === 0) {
+                delete slots_booked[slotDate];
+            }
+        }
+
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+        res.json({ success: true, message: "Appointment cancelled successfully" });
+    } catch (error) {
+        console.error("Cancel appointment error:", error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment };

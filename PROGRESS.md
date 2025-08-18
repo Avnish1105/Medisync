@@ -22,10 +22,12 @@
 - [x] Display All Doctors List in Admin Panel
 - [x] Display All Doctors on Frontend Website from Database
 - [x] Create Patient Login and Registration System
-- [ ] Display and Update Patient Profile Data on Website
-- [ ] Create Appointment Booking Functionality
-- [ ] Display Booked Appointments on Website
-- [ ] Create Appointment Cancellation Feature for Patients
+- [x] Display and Update Patient Profile Data on Website
+- [x] Create Appointment Booking Functionality
+- [x] Display Booked Appointments on Website
+- [x] Create Appointment Cancellation Feature for Patients
+
+## 🔄 Pending Work
 - [ ] Integrate Online Payment Gateway for Appointments
 - [ ] Display and Manage Appointments for Admin Panel
 - [ ] Create Dashboard Page for Admin Panel

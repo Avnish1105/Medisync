@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 
 const MyAppointments = () => {
-  const { appointments, fetchAppointments } = useContext(AppContext);
+  const { appointments, fetchAppointments, cancelAppointment } = useContext(AppContext);
 
   useEffect(() => {
     fetchAppointments();
@@ -40,6 +40,9 @@ const MyAppointments = () => {
                       <strong>Date & Time:</strong> {appt.slotDate} | {appt.slotTime}
                     </p>
                   </div>
+                  {appt.cancelled && (
+                    <div className="mt-2 text-red-500 font-semibold text-sm">Cancelled</div>
+                  )}
                 </div>
               </div>
 
@@ -52,7 +55,13 @@ const MyAppointments = () => {
                   Paid
                 </button>
                 <button
-                  className="border border-gray-400 text-sm px-5 py-2 rounded-md hover:border-red-500 hover:text-red-500 transition-colors"
+                  className={`border border-gray-400 text-sm px-5 py-2 rounded-md transition-colors ${
+                    appt.cancelled
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:border-red-500 hover:text-red-500'
+                  }`}
+                  disabled={appt.cancelled}
+                  onClick={() => cancelAppointment(appt._id)}
                 >
                   Cancel appointment
                 </button>

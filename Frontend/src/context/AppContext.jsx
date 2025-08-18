@@ -145,6 +145,25 @@ const AppContextProvider = (props) => {
         }
     };
 
+    // --- Add this function for cancellation ---
+    const cancelAppointment = async (appointmentId) => {
+        try {
+            const res = await axios.post(
+                backendUrl + '/api/user/cancel-appointment',
+                { userId: userData._id, appointmentId },
+                { headers: { token } }
+            );
+            if (res.data.success) {
+                toast.success(res.data.message || "Appointment cancelled");
+                fetchAppointments();
+            } else {
+                toast.error(res.data.message || "Failed to cancel appointment");
+            }
+        } catch (err) {
+            toast.error("Error cancelling appointment");
+        }
+    };
+
     useEffect(() => {
         getDoctorsData();
     }, []);
@@ -173,6 +192,7 @@ const AppContextProvider = (props) => {
             bookAppointment,
             appointments,
             fetchAppointments,
+            cancelAppointment, // <-- Add this to context
         }}>
             {props.children}
         </AppContext.Provider>
