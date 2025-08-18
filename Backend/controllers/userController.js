@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 // API to register a new user
 const registerUser = async (req, res) => {
     try {
+        console.log("Register request body:", req.body);
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
             return res.json({ success: false, message: "Please fill all the fields" });
@@ -32,6 +33,7 @@ const registerUser = async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
         res.json({ success: true, token });
     } catch (error) {
+        console.error("Register error:", error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -39,6 +41,7 @@ const registerUser = async (req, res) => {
 // API for user login
 const loginUser = async (req, res) => {
     try {
+        console.log("Login request body:", req.body);
         const { email, password } = req.body;
         const user = await userModel.findOne({ email });
         if (!user) {
@@ -53,6 +56,7 @@ const loginUser = async (req, res) => {
         }
     }
     catch (error) {
+        console.error("Login error:", error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -60,11 +64,13 @@ const loginUser = async (req, res) => {
 // API to get user profile data
 const getProfile = async (req, res) => {
     try {
+        console.log("Get profile for userId:", req.userId || req.body.userId);
         // userId is set by auth middleware (from token)
         const userId = req.userId || req.body.userId;
         const userData = await userModel.findById(userId).select('-password');
         res.json({ success: true, userData });
     } catch (error) {
+        console.error("Get profile error:", error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -72,6 +78,7 @@ const getProfile = async (req, res) => {
 // API to update user profile data
 const updateProfile = async (req, res) => {
     try {
+        console.log("Update profile request body:", req.body);
         const { userId, name, phone, address, dob, gender } = req.body;
         const imageFile = req.file;
 
@@ -128,13 +135,15 @@ const updateProfile = async (req, res) => {
         res.json({ success: true, message: "Profile updated successfully" });
 
     } catch (error) {
+        console.error("Update profile error:", error);
         res.json({ success: false, message: error.message });
     }
 }
 
-//API to book an appointment
+// API to book an appointment
 const bookAppointment = async (req, res) => {
     try {
+        console.log("Book appointment request body:", req.body);
         let { userId, docId, slotDate, slotTime } = req.body;
 
         // Convert IDs to ObjectId
@@ -169,7 +178,6 @@ const bookAppointment = async (req, res) => {
         }
 
         const userData = await userModel.findById(userId).select('-password');
-        delete docData.slots_booked;
 
         const appointmentData = {
             userId,
@@ -188,12 +196,29 @@ const bookAppointment = async (req, res) => {
         // Save new slots data in docData
         await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
-        res.json({ success: true, message: "Appointment booked successfully" });
-
+        res.json({ success: true, message: "Appointment booked successfully", appointment: newAppointment });
+        console.log("Appointment booked for userId:", userId, "docId:", docId, "slot:", slotDate, slotTime);
     } catch (error) {
-        console.log(error);
+        console.error("Book appointment error:", error);
         res.json({ success: false, message: error.message });
     }
 };
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment };
+// API to get user appointments for frontend my-appointments page
+const listAppointment = async (req, res) => {
+    try {
+        console.log("List appointments for userId:", req.userId || (req.body && req.body.userId));
+        // For GET, userId is set by authUser middleware on req.body.userId and/or req.userId
+        const userId = req.userId || (req.body && req.body.userId);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.json({ success: false, message: "Invalid user ID" });
+        }
+        const appointments = await appointmentModel.find({ userId: new mongoose.Types.ObjectId(userId) });
+        res.json({ success: true, appointments });
+    } catch (error) {
+        console.error("List appointments error:", error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment };

@@ -9,6 +9,7 @@ const AppContextProvider = (props) => {
     const [doctors, setDoctors] = useState([]);
     const [token, setToken] = useState(localStorage.getItem('token') || '');
     const [userData, setUserData] = useState(null);
+    const [appointments, setAppointments] = useState([]);
 
     const getDoctorsData = async () => {
         try {
@@ -130,6 +131,20 @@ const AppContextProvider = (props) => {
         }
     };
 
+    const fetchAppointments = async () => {
+        try {
+            const res = await axios.get(
+                backendUrl + '/api/user/appointments',
+                { headers: { token } }
+            );
+            if (res.data.success) {
+                setAppointments(res.data.appointments);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         getDoctorsData();
     }, []);
@@ -137,6 +152,7 @@ const AppContextProvider = (props) => {
     useEffect(() => {
         if (token) {
             loadUserProfileData();
+            fetchAppointments();
         } else {
             setUserData(null);
         }
@@ -154,7 +170,9 @@ const AppContextProvider = (props) => {
             userData,
             loadUserProfileData,
             updateProfile,
-            bookAppointment
+            bookAppointment,
+            appointments,
+            fetchAppointments,
         }}>
             {props.children}
         </AppContext.Provider>
