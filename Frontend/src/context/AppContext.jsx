@@ -121,6 +121,7 @@ const AppContextProvider = (props) => {
             );
             if (res.data.success) {
                 toast.success(res.data.message || 'Appointment booked successfully!');
+                await getDoctorsData(); // <-- Refresh doctors after booking
             } else {
                 toast.error(res.data.message || 'Failed to book appointment');
             }
@@ -156,6 +157,7 @@ const AppContextProvider = (props) => {
             if (res.data.success) {
                 toast.success(res.data.message || "Appointment cancelled");
                 fetchAppointments();
+                await getDoctorsData(); // <-- Refresh doctors after cancellation
             } else {
                 toast.error(res.data.message || "Failed to cancel appointment");
             }
@@ -192,7 +194,7 @@ const AppContextProvider = (props) => {
             bookAppointment,
             appointments,
             fetchAppointments,
-            cancelAppointment, // <-- Add this to context
+            cancelAppointment,
         }}>
             {props.children}
         </AppContext.Provider>

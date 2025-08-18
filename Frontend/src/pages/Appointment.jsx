@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import RelatedDoctors from '../components/RelatedDoctors';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Appointment = () => {
   const navigate = useNavigate();
   const { doctorId } = useParams();
-  const { doctors, userData, bookAppointment } = useContext(AppContext);
+  const { userData, bookAppointment, backendUrl } = useContext(AppContext);
   const [docInfo, setDocInfo] = useState(null);
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -15,11 +16,22 @@ const Appointment = () => {
 
   const timeRange = { start: 10, end: 20.5 }; // 10 AM to 8:30 PM
 
+  // Always fetch latest doctor info from backend
+  const reloadDoctorInfo = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/doctor/${doctorId}`);
+      if (res.data.success) {
+        setDocInfo(res.data.doctor);
+      }
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
+
+  // Always fetch latest doctor info on mount and when doctorId changes
   useEffect(() => {
-    // Fix: compare as strings to avoid ObjectId vs string mismatch
-    const found = doctors.find(doc => String(doc._id) === String(doctorId));
-    setDocInfo(found);
-  }, [doctorId, doctors]);
+    reloadDoctorInfo();
+  }, [doctorId]);
 
   useEffect(() => {
     generateSlots();
@@ -47,15 +59,20 @@ const Appointment = () => {
     setAvailableSlots(slots);
   };
 
+  const pad = n => n.toString().padStart(2, '0');
   const getNext7Days = () => {
     const today = new Date();
     return [...Array(7)].map((_, i) => {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
+      // Build YYYY-MM-DD in local time
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
       return {
         day: date.toLocaleDateString('en-US', { weekday: 'short' }),
         date: date.getDate(),
-        fullDate: date.toISOString().split('T')[0], // YYYY-MM-DD
+        fullDate: `${year}-${month}-${day}`,
       };
     });
   };
@@ -82,24 +99,28 @@ const Appointment = () => {
       return;
     }
     const selectedDay = getNext7Days()[selectedDateIndex];
-
     const payload = {
       userId: userData._id,
       docId: docInfo._id,
       slotDate: selectedDay.fullDate,
       slotTime: selectedSlot
     };
-
-    // Await the booking and check the result before redirecting
     const result = await bookAppointment(payload);
-
-    // Only redirect if booking was successful
     if (result && result.success) {
       setSelectedSlot('');
-      navigate('/myappointments');
+      await reloadDoctorInfo(); // Reload slots after booking
+      toast.success('Appointment booked! Updating slots...');
+      setTimeout(() => navigate('/myappointments'), 1000); // 1 second delay
     }
-    // If not successful, do not redirect (toast will show error)
   };
+
+  // --- Auto-reload slots every 10 seconds ---
+  useEffect(() => {
+    const interval = setInterval(() => {
+      reloadDoctorInfo();
+    }, 10000); // 10 seconds
+    return () => clearInterval(interval);
+  }, [doctorId]);
 
   if (!docInfo) return <div className="text-center mt-10 text-lg">Loading doctor info...</div>;
 
