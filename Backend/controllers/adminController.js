@@ -102,15 +102,54 @@ const allDoctors = async (req, res) => {
 
 //API to get all appointments list
 const appointmentsAdmin = async (req, res) => {
-    try{
-        const appointments = await appointmentModel.find({})
-        res.json({ success: true, appointments});
-
-
+    try {
+        const appointments = await appointmentModel.find({});
+        console.log("ADMIN APPOINTMENTS:", appointments); // Add this line
+        res.json({ success: true, appointments });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
     }
-}
+};
 
-export { addDoctor, loginAdmin, allDoctors, appointmentsAdmin };
+// Cancel appointment by admin
+const cancelAppointmentAdmin = async (req, res) => {
+    try {
+        const { appointmentId } = req.body;
+
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData) {
+            return res.json({ success: false, message: "Appointment not found" });
+        }
+        if (appointmentData.cancelled) {
+            return res.json({ success: false, message: "Appointment already cancelled" });
+        }
+
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
+
+        // Releasing the doctor's slot
+        const { docId, slotDate, slotTime } = appointmentData;
+        const doctorData = await doctorModel.findById(docId);
+        if (!doctorData) {
+            return res.json({ success: false, message: "Doctor not found" });
+        }
+
+        let slots_booked = doctorData.slots_booked || {};
+        if (slots_booked[slotDate]) {
+            slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime);
+            // Remove the date key if no slots left for that date
+            if (slots_booked[slotDate].length === 0) {
+                delete slots_booked[slotDate];
+            }
+        }
+
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+        res.json({ success: true, message: "Appointment cancelled successfully by admin" });
+    } catch (error) {
+        console.error("Admin cancel appointment error:", error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { addDoctor, loginAdmin, allDoctors, appointmentsAdmin, cancelAppointmentAdmin };

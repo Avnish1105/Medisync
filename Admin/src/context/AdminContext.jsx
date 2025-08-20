@@ -26,6 +26,25 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
+  // Cancel appointment by admin
+  const cancelAppointment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/admin/cancel-appointment`,
+        { appointmentId },
+        { headers: { token: adminToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        fetchAllAppointments(); // Refresh the list
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const getAllDoctors = async () => {
     try {
       const { data } = await axios.post(
@@ -66,6 +85,7 @@ const AdminContextProvider = ({ children }) => {
     <AdminContext.Provider value={{
       appointments,
       fetchAllAppointments,
+      cancelAppointment, // <-- Add this to context
       adminToken,
       setAdminToken,
       doctors,

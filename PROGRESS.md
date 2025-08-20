@@ -26,10 +26,9 @@
 - [x] Create Appointment Booking Functionality
 - [x] Display Booked Appointments on Website
 - [x] Create Appointment Cancellation Feature for Patients
+- [x] Display and Manage Appointments for Admin Panel
 
 ## 🔄 Pending Work
-- [ ] Integrate Online Payment Gateway for Appointments
-- [ ] Display and Manage Appointments for Admin Panel
 - [ ] Create Dashboard Page for Admin Panel
 - [ ] Create Doctor Dashboard Panel
 - [ ] Display and Manage Appointments in Doctor Panel
