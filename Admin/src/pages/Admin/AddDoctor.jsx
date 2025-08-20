@@ -3,6 +3,7 @@ import { assets } from '../../assets/assets';
 import { AdminContext } from '../../context/AdminContext';
 import { toast } from "react-toastify";
 import axios from 'axios';
+
 const AddDoctor = () => {
     const [docImg, setDocImg] = React.useState(null);
     const [name, setName] = React.useState('');

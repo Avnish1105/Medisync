@@ -5,9 +5,12 @@ import { toast } from "react-toastify";
 
 const Login = () => {
   const [loginType, setLoginType] = useState("Admin");
-  const { setAtoken, backendUrl } = useContext(AdminContext);
+  const { setAdminToken } = useContext(AdminContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Use VITE_BACKEND_URL directly here for reliability
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -16,9 +19,10 @@ const Login = () => {
       if (loginType === "Admin") {
         const { data } = await axios.post(`${backendUrl}/api/admin/login`, { email, password });
         if (data.success) {
-          localStorage.setItem("atoken", data.token);
-          setAtoken(data.token);
+          localStorage.setItem("adminToken", data.token);
+          setAdminToken(data.token);
           toast.success("Login successful!");
+          // Optionally, redirect to dashboard here
         } else {
           toast.error(data.message || "Login failed");
         }

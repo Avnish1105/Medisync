@@ -1,61 +1,80 @@
-import React, { createContext } from 'react';
-export const AdminContext = createContext();
+import React, { createContext, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const AdminContextProvider = (props) => {
-    const [atoken, setAtoken] = React.useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : null);
-    const [doctors, setDoctors] = React.useState([]);
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export const AdminContext = createContext();
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    const getAllDoctors = async () => {
-        try {
-            const { data } = await axios.post(
-                backendUrl + '/api/admin/all-doctors',
-                {},
-                { headers: { atoken } }
-            );
+const AdminContextProvider = ({ children }) => {
+  const [appointments, setAppointments] = useState([]);
+  const [adminToken, setAdminToken] = useState(localStorage.getItem('adminToken') || '');
+  const [doctors, setDoctors] = React.useState([]);
 
-            if (data.success) {
-                setDoctors(data.doctors);
-                // Remove or comment out the debug log after testing
-                // console.log(data.doctors);
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
-
-    const changeAvailability = async (docId) => {
-        try{
-            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { atoken } });
-            if (data.success) {
-                toast.success(data.message);
-                getAllDoctors();
-            } else{
-                toast.error(data.message);
-            }
-        } catch (error) {
-            toast.error(error.message);
-        }
+  // Fetch all appointments for admin
+  const fetchAllAppointments = async () => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/admin/appointments`,
+        {},
+        { headers: { token: adminToken } }
+      );
+      if (res.data.success) {
+        setAppointments(res.data.appointments);
+      }
+    } catch (err) {
+      // handle error (toast, etc.)
     }
+  };
 
-    const value = {
-        atoken,
-        setAtoken,
-        backendUrl,
-        doctors,
-        getAllDoctors,
-        changeAvailability
-    };
+  const getAllDoctors = async () => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + '/api/admin/all-doctors',
+        {},
+        { headers: { token: adminToken } } // <-- fixed here
+      );
 
-    return (
-        <AdminContext.Provider value={value}>
-            {props.children}
-        </AdminContext.Provider>
-    );
-}
+      if (data.success) {
+        setDoctors(data.doctors);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const changeAvailability = async (docId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + '/api/admin/change-availability',
+        { docId },
+        { headers: { token: adminToken } } // <-- fixed here
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getAllDoctors();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  return (
+    <AdminContext.Provider value={{
+      appointments,
+      fetchAllAppointments,
+      adminToken,
+      setAdminToken,
+      doctors,
+      getAllDoctors,
+      changeAvailability
+    }}>
+      {children}
+    </AdminContext.Provider>
+  );
+};
 
 export default AdminContextProvider;

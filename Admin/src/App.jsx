@@ -13,9 +13,9 @@ import AddDoctor from "./pages/Admin/AddDoctor";
 import Doctorlist from "./pages/Admin/Doctorslist";
 
 const App = () => {
-  const { atoken } = React.useContext(AdminContext);
+  const { adminToken } = React.useContext(AdminContext);
 
-  return atoken ? (
+  return adminToken ? (
     <div>
       <ToastContainer />
       {/* Sidebar fixed on left */}

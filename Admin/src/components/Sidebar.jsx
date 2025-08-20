@@ -4,7 +4,7 @@ import { assets } from '../assets/assets';
 import { AdminContext } from '../context/AdminContext';
 
 const Sidebar = () => {
-  const { atoken } = useContext(AdminContext);
+  const { adminToken } = useContext(AdminContext);
 
   return (
     <div className="h-screen w-64 bg-white border-r border-gray-200 flex-shrink-0 fixed left-0 top-0">
@@ -18,7 +18,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation Links */}
-      {atoken && (
+      {adminToken && (
         <ul className="flex-1 px-2 space-y-2">
           <NavLink
             to="/admindashboard"
