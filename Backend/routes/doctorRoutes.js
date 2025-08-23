@@ -1,11 +1,12 @@
 import express from 'express';
-import { doctorList } from '../controllers/doctorController.js';
-import doctorModel from '../models/doctormodel.js'; // Add this import
+import { doctorList, doctorLogin } from '../controllers/doctorController.js'; // <-- use doctorLogin
+import doctorModel from '../models/doctormodel.js';
 const doctorRouter = express.Router();
 
 doctorRouter.get('/list', doctorList);
+doctorRouter.post('/login', doctorLogin); // <-- use doctorLogin
 
-// Add this route to get doctor details by ID
+// Get doctor details by ID
 doctorRouter.get('/:id', async (req, res) => {
   try {
     const doctor = await doctorModel.findById(req.params.id);

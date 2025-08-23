@@ -9,6 +9,7 @@ const AdminContextProvider = ({ children }) => {
   const [appointments, setAppointments] = useState([]);
   const [adminToken, setAdminToken] = useState(localStorage.getItem('adminToken') || '');
   const [doctors, setDoctors] = React.useState([]);
+  const [dashboard, setDashboard] = useState(null);
 
   // Fetch all appointments for admin
   const fetchAllAppointments = async () => {
@@ -81,16 +82,34 @@ const AdminContextProvider = ({ children }) => {
     }
   };
 
+  const fetchDashboard = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/admin/dashboard`,
+        { headers: { token: adminToken } }
+      );
+      if (data.success) {
+        setDashboard(data.dashData);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <AdminContext.Provider value={{
       appointments,
       fetchAllAppointments,
-      cancelAppointment, // <-- Add this to context
+      cancelAppointment,
       adminToken,
       setAdminToken,
       doctors,
       getAllDoctors,
-      changeAvailability
+      changeAvailability,
+      dashboard,           // <-- add this
+      fetchDashboard       // <-- add this
     }}>
       {children}
     </AdminContext.Provider>

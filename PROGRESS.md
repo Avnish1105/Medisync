@@ -27,10 +27,10 @@
 - [x] Display Booked Appointments on Website
 - [x] Create Appointment Cancellation Feature for Patients
 - [x] Display and Manage Appointments for Admin Panel
+- [x] Create Dashboard Page for Admin Panel
+- [x] Create Doctor Dashboard Panel
 
 ## 🔄 Pending Work
-- [ ] Create Dashboard Page for Admin Panel
-- [ ] Create Doctor Dashboard Panel
 - [ ] Display and Manage Appointments in Doctor Panel
 - [ ] Create Dashboard Page for Doctor Panel
 - [ ] Display and Update Profile Data in Doctor Panel

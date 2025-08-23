@@ -2,7 +2,8 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctormodel.js";
-import appointmentModel from "../models/appointmentmodel.js"; // <-- Add this line
+import appointmentModel from "../models/appointmentmodel.js";
+import userModel from "../models/usermodel.js"; // <-- Add this line
 import jwt from "jsonwebtoken";
 
 //API for adding doctorx
@@ -152,4 +153,31 @@ const cancelAppointmentAdmin = async (req, res) => {
     }
 };
 
-export { addDoctor, loginAdmin, allDoctors, appointmentsAdmin, cancelAppointmentAdmin };
+// API to get dashboard data for admin panel
+const adminDashboard = async (req, res) => {
+    try {
+        const doctors = await doctorModel.find({});
+        const users = await userModel.find({});
+        const appointments = await appointmentModel.find({});
+
+        const dashData = {
+            doctors: doctors.length,
+            appointments: appointments.length,
+            patients: users.length,
+            latestAppointments: appointments.reverse().slice(0, 5)
+        };
+
+        res.json({ success: true, dashData });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export {
+    addDoctor,
+    loginAdmin,
+    allDoctors,
+    appointmentsAdmin,
+    cancelAppointmentAdmin,
+    adminDashboard 
+};

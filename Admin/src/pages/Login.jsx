@@ -1,15 +1,16 @@
 import React, { useState, useContext } from "react";
 import { AdminContext } from "../context/AdminContext";
+import { DoctorContext } from "../context/DoctorContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const Login = () => {
   const [loginType, setLoginType] = useState("Admin");
   const { setAdminToken } = useContext(AdminContext);
+  const { loginDoctor } = useContext(DoctorContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Use VITE_BACKEND_URL directly here for reliability
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const onSubmitHandler = async (event) => {
@@ -21,10 +22,19 @@ const Login = () => {
         if (data.success) {
           localStorage.setItem("adminToken", data.token);
           setAdminToken(data.token);
-          toast.success("Login successful!");
-          // Optionally, redirect to dashboard here
+          toast.success("Admin login successful!");
+          // Optionally, redirect to admin dashboard here
         } else {
           toast.error(data.message || "Login failed");
+        }
+      } else {
+        // Doctor login
+        const res = await loginDoctor(email, password);
+        if (res.success) {
+          toast.success("Doctor login successful!");
+          // Optionally, redirect to doctor dashboard here
+        } else {
+          toast.error(res.message || "Login failed");
         }
       }
     } catch (error) {

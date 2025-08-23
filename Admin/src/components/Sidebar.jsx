@@ -8,10 +8,9 @@ const Sidebar = () => {
 
   return (
     <div className="h-screen w-64 bg-white border-r border-gray-200 flex-shrink-0 fixed left-0 top-0">
-      {/* Logo and Title */}
+      {/* Title only, logo removed */}
       <div className="flex items-center gap-3 px-6 py-6">
-        <img src={assets.admin_logo} alt="Logo" className="h-8 w-8 object-contain" />
-        <h1 className="text-lg font-semibold text-gray-900">Prescripto</h1>
+        <h1 className="text-lg font-semibold text-gray-900">Medisync</h1>
         <span className="text-xs bg-white border border-gray-300 px-2 py-0.5 rounded-full text-gray-700">
           Admin
         </span>

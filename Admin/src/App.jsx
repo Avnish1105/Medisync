@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AdminContext } from "./context/AdminContext";
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Dashboard from "./pages/Admin/Dashboard";
 import AllAppointments from "./pages/Admin/AllAppointments";
@@ -28,11 +28,12 @@ const App = () => {
         <Navbar />
         <main className="p-6">
           <Routes>
-            <Route path="/" element={<></>} />
+            <Route path="/" element={<Navigate to="/admindashboard" />} />
             <Route path="/admindashboard" element={<Dashboard />} />
             <Route path="/allappointments" element={<AllAppointments />} />
             <Route path="/add-doctor" element={<AddDoctor />} />
             <Route path="/doctor-list" element={<Doctorlist />} />
+            <Route path="*" element={<Navigate to="/admindashboard" />} />
           </Routes>
         </main>
       </div>

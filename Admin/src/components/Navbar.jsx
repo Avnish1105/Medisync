@@ -1,5 +1,4 @@
 import React from 'react';
-import { assets } from '../assets/assets';
 import { AdminContext } from '../context/AdminContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,13 +16,8 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-      {/* Left side - Logo + Role badge */}
+      {/* Left side - Role badge only */}
       <div className="flex items-center gap-3">
-        <img
-          src={assets.admin_logo}
-          alt="Prescripto Logo"
-          className="h-10 w-auto object-contain"
-        />
         <span className="text-sm bg-white border border-gray-300 px-3 py-1 rounded-full text-gray-700 shadow-sm">
           {adminToken ? 'Admin' : 'Doctor'}
         </span>

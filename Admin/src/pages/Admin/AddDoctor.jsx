@@ -17,7 +17,8 @@ const AddDoctor = () => {
     const [address1, setAddress1] = React.useState('');
     const [address2, setAddress2] = React.useState('');
 
-    const { backendUrl, atoken } = React.useContext(AdminContext);
+    const { adminToken } = React.useContext(AdminContext);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const onsSubmitHandler = async (event) => {
         event.preventDefault();
@@ -26,8 +27,6 @@ const AddDoctor = () => {
             if (!docImg) {
                 return toast.error("Image not selected!");
             }
-            // Add your form submission logic here
-            //toast.success("Doctor added (demo)!");
             const formData = new FormData();
             formData.append('image', docImg);
             formData.append('name', name);
@@ -38,36 +37,30 @@ const AddDoctor = () => {
             formData.append('about', about);
             formData.append('speciality', speciality);
             formData.append('degree', degree);
-            formData.append('address', JSON.stringify({line1:address1, line2: address2}));
+            formData.append('address', JSON.stringify({ line1: address1, line2: address2 }));
 
-            //console.log(formData);
-            formData.forEach((value, key) => {
-                console.log(`${key}:${value}`);
-            });
+            const { data } = await axios.post(
+                backendUrl + '/api/admin/add-doctor',
+                formData,
+                { headers: { token: adminToken } }
+            );
 
-                const {data} = await axios.post(backendUrl + '/api/admin/add-doctor', formData, {headers:{atoken}})
-                
-                if(data.success) {
-                    toast.success(data.message);
-                    setDocImg(false);
-                    setName('');
-                    setEmail('');
-                    setPassword('');
-                    setExperience('1 Year');
-                    setFees('');
-                    setSpeciality('General Physician');
-                    setAbout('');
-                    setDegree('');
-                    setAddress1('');
-                    setAddress2('');
-
-                }else{
-                    toast.error(data.message);  
-                }     
-                
-
-
-
+            if (data.success) {
+                toast.success(data.message);
+                setDocImg(null);
+                setName('');
+                setEmail('');
+                setPassword('');
+                setExperience('1 Year');
+                setFees('');
+                setSpeciality('General Physician');
+                setAbout('');
+                setDegree('');
+                setAddress1('');
+                setAddress2('');
+            } else {
+                toast.error(data.message);
+            }
         } catch (error) {
             toast.error(error.message);
             console.log(error);
@@ -246,4 +239,4 @@ const AddDoctor = () => {
     )
 }
 
-export default AddDoctor
+export default AddDoctor;
